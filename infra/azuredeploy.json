@@ -1,0 +1,130 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "customDomainName": {
+            "type": "string",
+            "defaultValue": null
+        },
+        "cdnEndpointUriStem": {
+            "type": "string",
+            "defaultValue": null
+        },
+        // "existingDnsZoneResourceGroup": {
+        //     "type": "string",
+        //     "defaultValue": null
+        // },
+        "existingDnsZoneName": {
+            "type": "string",
+            "defaultValue": null
+        },
+        "containerName": {
+            "type": "string",
+            "defaultValue": null
+        }
+    },
+    "variables": {
+        "storageAccountName": "staticsiteblob",
+        "cdnName": "staticsitecdn",
+        "cnameStem": "jacob",
+        "ttl": 3600,
+
+        "cdnEndpoint": "[concat(parameters('cdnEndpointUriStem'), '.azureedge.net')]",
+
+        // "existingDnsZoneId": "[resourceId(parameters('existingDnsZoneResourceGroup'), 'Microsoft.Network/dnsZones', parameters('existingDnsZoneName'))]",
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2016-01-01",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "name": "[concat(parameters('existingDnsZoneName'), '/', variables('cnameStem'))]",
+            "type": "Microsoft.Network/dnszones/CNAME",
+            "apiVersion": "2016-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('cdnEndpointUriStem'))]"
+            ],
+            "properties": {
+                "CNAMERecord": {
+                    "cname": "[variables('cdnEndpoint')]"
+                },
+                "TTL": "[variables('ttl')]"
+            }
+        },
+        {
+            "name": "[variables('cdnName')]",
+            "type": "Microsoft.Cdn/profiles",
+            "apiVersion": "2015-06-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('storageAccountId')]"
+            ],
+            "sku": {
+                "name": "Premium_Verizon"
+            },
+            "properties": {},
+            "resources": [
+                {
+                    "name": "[parameters('cdnEndpointUriStem')]",
+                    "type": "endpoints",
+                    "apiVersion": "2015-06-01",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]"
+                    ],
+                    "properties": {
+                        "originHostHeader": "[replace(replace(reference(variables('storageAccountName')).primaryEndpoints.blob,'https://',''),'/','')]",
+                        "originPath": "[concat('/', parameters('containerName'))]",
+                        "isHttpAllowed": true,
+                        "isHttpsAllowed": true,
+                        "queryStringCachingBehavior": "IgnoreQueryString",
+                        "isCompressionEnabled": true,
+                        "contentTypesToCompress": [
+                          "text/plain",
+                          "text/html",
+                          "text/css",
+                          "application/x-javascript",
+                          "text/javascript"
+                        ],
+                        "origins": [
+                            {
+                                "name": "blobEndpoint",
+                                "properties": {
+                                    "hostName": "[replace(replace(reference(variables('storageAccountName')).primaryEndpoints.blob,'https://',''),'/','')]",
+                                    "httpPort": 80,
+                                    "httpsPort": 443
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[concat(variables('cdnName'), '/', parameters('cdnEndpointUriStem'), '/', 'customDomain')]",
+            "type": "Microsoft.Cdn/profiles/endpoints/customDomains",
+            "apiVersion": "2015-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('cdnEndpointUriStem'))]",
+                "[resourceId('Microsoft.Network/dnszones/CNAME', parameters('existingDnsZoneName'), variables('cnameStem'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "hostName": "[parameters('customDomainName')]"
+            }
+        }
+    ],
+    "outputs": {}
+}
