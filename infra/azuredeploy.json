@@ -222,7 +222,7 @@
                 "[resourceId('Microsoft.Network/dnszones/CNAME', parameters('existingDnsZoneName'), variables('cnameStem'))]"
             ],
             "properties": {
-                "hostName": "[parameters('customDomainName')]"
+                "hostName": "[concat(variables('cnameStem'), '.', parameters('customDomainName'))]"
             }
         }
     ],
