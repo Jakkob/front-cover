@@ -42,11 +42,11 @@
             "sku": {
                 "name": "Standard_LRS"
             },
-            "kind": "Storage",
+            "kind": "BlobStorage",
             "location": "[resourceGroup().location]",
             "tags": {},
             "properties": {
-                "accessTier": "Cool"
+                "accessTier": "Hot"
             }
         },
         {
