@@ -221,7 +221,6 @@
                 "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('cdnEndpointUriStem'))]",
                 "[resourceId('Microsoft.Network/dnszones/CNAME', parameters('existingDnsZoneName'), variables('cnameStem'))]"
             ],
-            "location": "[resourceGroup().location]",
             "properties": {
                 "hostName": "[parameters('customDomainName')]"
             }
