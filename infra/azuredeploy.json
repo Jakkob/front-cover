@@ -46,7 +46,7 @@
             "location": "[resourceGroup().location]",
             "tags": {},
             "properties": {
-                "accessTier": "Hot"
+                "accessTier": "Cool"
             }
         },
         {
