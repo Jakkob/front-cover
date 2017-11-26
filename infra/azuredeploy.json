@@ -89,15 +89,6 @@
                         "originPath": "[concat('/', parameters('containerName'))]",
                         "isHttpAllowed": true,
                         "isHttpsAllowed": true,
-                        "queryStringCachingBehavior": "IgnoreQueryString",
-                        "isCompressionEnabled": true,
-                        "contentTypesToCompress": [
-                          "text/plain",
-                          "text/html",
-                          "text/css",
-                          "application/x-javascript",
-                          "text/javascript"
-                        ],
                         "origins": [
                             {
                                 "name": "blobEndpoint",
