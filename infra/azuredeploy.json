@@ -10,10 +10,10 @@
             "type": "string",
             "defaultValue": null
         },
-        // "existingDnsZoneResourceGroup": {
-        //     "type": "string",
-        //     "defaultValue": null
-        // },
+        "existingDnsZoneResourceGroup": {
+            "type": "string",
+            "defaultValue": null
+        },
         "existingDnsZoneName": {
             "type": "string",
             "defaultValue": null
@@ -54,6 +54,7 @@
             "type": "Microsoft.Network/dnszones/CNAME",
             "apiVersion": "2016-04-01",
             "dependsOn": [
+                "[resourceId(subscription().subscriptionId, parameters('existingDnsZoneResourceGroup'), 'Microsoft.Network/dnsZones', parameters('existingDnsZoneName'))]",
                 "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('cdnEndpointUriStem'))]"
             ],
             "properties": {
