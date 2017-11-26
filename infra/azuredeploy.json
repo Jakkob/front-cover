@@ -27,6 +27,7 @@
         "storageAccountName": "staticsiteblob",
         "cdnName": "staticsitecdnbluem",
         "cnameStem": "jacob",
+        "googleDkimTxtRecordName": "google._domainkey",
         "ttl": 3600,
 
         "cdnEndpoint": "[concat(parameters('cdnEndpointUriStem'), '.azureedge.net')]",
@@ -50,11 +51,119 @@
             }
         },
         {
+            "type": "Microsoft.Network/dnszones",
+            "name": "[parameters('existingDnsZoneName')]",
+            "apiVersion": "2016-04-01",
+            "location": "global",
+            "properties": {
+                "maxNumberOfRecordSets": 5000
+            },
+            "resources": [
+                {
+                    "type": "MX",
+                    "name": "@",
+                    "apiVersion": "2016-04-01",
+                    "properties": {
+                        "TTL": "[variables('ttl')]",
+                        "MXRecords": [
+                            {
+                                "exchange": "ASPMX.L.GOOGLE.COM.",
+                                "preference": 1
+                            },
+                            {
+                                "exchange": "ALT1.ASPMX.L.GOOGLE.COM.",
+                                "preference": 5
+                            },
+                            {
+                                "exchange": "ALT2.ASPMX.L.GOOGLE.COM.",
+                                "preference": 5
+                            },
+                            {
+                                "exchange": "ALT3.ASPMX.L.GOOGLE.COM.",
+                                "preference": 10
+                            },
+                            {
+                                "exchange": "ALT4.ASPMX.L.GOOGLE.COM.",
+                                "preference": 10
+                            }
+                        ]
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/dnszones', parameters('existingDnsZoneName'))]"
+                    ]
+                },
+                {
+                    "type": "NS",
+                    "name": "@",
+                    "apiVersion": "2016-04-01",
+                    "properties": {
+                        "TTL": 172800,
+                        "NSRecords": [
+                            {
+                                "nsdname": "ns1-02.azure-dns.com."
+                            },
+                            {
+                                "nsdname": "ns2-02.azure-dns.net."
+                            },
+                            {
+                                "nsdname": "ns3-02.azure-dns.org."
+                            },
+                            {
+                                "nsdname": "ns4-02.azure-dns.info."
+                            }
+                        ]
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/dnszones', parameters('existingDnsZoneName'))]"
+                    ]
+                },
+                {
+                    "type": "SOA",
+                    "name": "@",
+                    "apiVersion": "2016-04-01",
+                    "properties": {
+                        "TTL": "[variables('ttl')]",
+                        "SOARecord": {
+                            "email": "azuredns-hostmaster.microsoft.com",
+                            "expireTime": 2419200,
+                            "host": "ns1-02.azure-dns.com.",
+                            "minimumTTL": 300,
+                            "refreshTime": 3600,
+                            "retryTime": 300,
+                            "serialNumber": 1
+                        }
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/dnszones', parameters('existingDnsZoneName'))]"
+                    ]
+                },
+                {
+                    "type": "TXT",
+                    "name": "[variables('googleDkimTxtRecordName')]",
+                    "apiVersion": "2016-04-01",
+                    "properties": {
+                        "TTL": "[variables('ttl')]",
+                        "TXTRecords": [
+                            {
+                                "value": [
+                                    "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2hdOMmCKJSW5uciAahoqFDhgKEKJznbn9u0KfNlJ7kQUMMB6vZpKn9+V8jTqgDhwF4Ujz7w8TriXk1SrYRe79zbF9N6oQbK8ljCD1F3+kIS/C210yQJ9bJooAaFlnBrYfjjJ+hUpQQkEWfS2uLhV18CtoWUD/+D7ZVJkuL0p8gSKjybXAhpBEDJ1DOSZSghc8",
+                                    "LrIuopHn/WIzHv20tyBeZZOJpeRqoytNZ4eFcq/EF+b03QjSAu+PWKz0UVOhFVAuaNsb9XFzpWkaQH16aUEuZt1n+/5vjDNVVNTl2S1+XqKBzEOCQ0CGPxfLVuFrpx6Lm0QCbO/GKv5EQNoxvIxDwIDAQAB"
+                                ]
+                            }
+                        ]
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/dnszones', parameters('existingDnsZoneName'))]"
+                    ]
+                }
+            ]
+        },
+        {
             "name": "[concat(parameters('existingDnsZoneName'), '/', variables('cnameStem'))]",
             "type": "Microsoft.Network/dnszones/CNAME",
             "apiVersion": "2016-04-01",
             "dependsOn": [
-                "[resourceId(subscription().subscriptionId, parameters('existingDnsZoneResourceGroup'), 'Microsoft.Network/dnszones', parameters('existingDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/dnszones', parameters('existingDnsZoneName'))]",
                 "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('cdnEndpointUriStem'))]"
             ],
             "properties": {
