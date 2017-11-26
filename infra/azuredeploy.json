@@ -66,7 +66,7 @@
         {
             "name": "[variables('cdnName')]",
             "type": "Microsoft.Cdn/profiles",
-            "apiVersion": "2015-06-01",
+            "apiVersion": "2016-04-02",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('storageAccountId')]"
@@ -79,7 +79,7 @@
                 {
                     "name": "[parameters('cdnEndpointUriStem')]",
                     "type": "endpoints",
-                    "apiVersion": "2015-06-01",
+                    "apiVersion": "2016-04-02",
                     "location": "[resourceGroup().location]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]"
@@ -115,7 +115,7 @@
         {
             "name": "[concat(variables('cdnName'), '/', parameters('cdnEndpointUriStem'), '/', 'customDomain')]",
             "type": "Microsoft.Cdn/profiles/endpoints/customDomains",
-            "apiVersion": "2015-06-01",
+            "apiVersion": "2016-04-02",
             "dependsOn": [
                 "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('cdnEndpointUriStem'))]",
                 "[resourceId('Microsoft.Network/dnszones/CNAME', parameters('existingDnsZoneName'), variables('cnameStem'))]"
