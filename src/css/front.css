@@ -7,6 +7,8 @@ body {
     right: 0;
     left: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 #fullscreen {
     z-index: -999;
@@ -17,6 +19,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
 }
 #avatar {
     height: 180px;
@@ -27,7 +30,7 @@ body {
 h1 {
     color: white;
     font-weight: bold;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
     font-size: 4em;
     font-family: 'Open Sans';
     margin: -10px 0;
@@ -40,7 +43,9 @@ h3 {
 .content {
     padding-top: 100px;
     padding-bottom: 40px;
-    background-color: rgba(0, 0, 0, 0.5);
+    height: 100vh;
+    vertical-align: top;
+    /* background-color: rgba(0, 0, 0, 0.5); */
     text-align: center;
 }
 ul {
